@@ -1,16 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <title>FINISH FABRIC INVENTORY.GMS </title>
-    
-
-  </head>
-    
-  <body>
-  <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -117,6 +106,14 @@
             border-radius: 4px;
             resize: vertical;
             font-family: inherit;
+        }
+        /* Custom style for currency select dropdown */
+        .currency-select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: white;
+            outline: none;
         }
     </style>
 </head>
@@ -226,8 +223,8 @@
                                     <option value="Gms Textiles Ltd">
                                     <option value="Sewing Department">
                                     <option value="Finishing Department">
-                                    <option value="Quality Control">
-                                    <option value="Export Department">
+                                    <option value="AOP">
+                                    <option value="Dyeing Return">
                                     <option value="Sample Department">
                                 </datalist>
                             </div>
@@ -312,8 +309,8 @@
                                         <th style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold;">UOM</th>
                                         <th style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold;">Grey Qty</th>
                                         <th style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold;">Issue Qty</th>
-                                        <th id="rateHeader" style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold; display: none;">Rate</th>
-                                        <th id="amountHeader" style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold; display: none;">Amount</th>
+                                        <th id="rateHeader" class="rate-cell" style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold; display: none;">Rate</th>
+                                        <th id="amountHeader" class="amount-cell" style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold; display: none;">Amount</th>
                                         <th style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold;">Remarks</th>
                                         <th style="border: 1px solid #dddddd; text-align: left; padding: 12px; background-color: black; color: white; font-weight: bold;">Action</th>
                                     </tr>
@@ -325,6 +322,20 @@
                                         </td>
                                     </tr>
                                 </tbody>
+                                <!-- ########## START: MODIFICATION FOR GRAND TOTAL ########## -->
+                                <tfoot>
+                                    <tr style="background-color: #1f2937; color: white; font-weight: bold; font-size: 1.1em;">
+                                        <th colspan="10" style="border: 1px solid #dddddd; text-align: right; padding: 12px;">Grand Total</th>
+                                        <th id="totalRolls" style="border: 1px solid #dddddd; text-align: center; padding: 12px;">0</th>
+                                        <th style="border: 1px solid #dddddd; padding: 12px;"></th> <!-- UOM -->
+                                        <th id="totalGreyQty" style="border: 1px solid #dddddd; text-align: right; padding: 12px;">0.00</th>
+                                        <th id="totalIssueQty" style="border: 1px solid #dddddd; text-align: right; padding: 12px;">0.00</th>
+                                        <th class="rate-cell" style="border: 1px solid #dddddd; display: none;"></th> <!-- Rate -->
+                                        <th id="totalAmount" class="amount-cell" style="border: 1px solid #dddddd; text-align: right; padding: 12px; display: none;">0.00</th>
+                                        <th colspan="2" style="border: 1px solid #dddddd;"></th> <!-- Remarks, Action -->
+                                    </tr>
+                                </tfoot>
+                                <!-- ########## END: MODIFICATION FOR GRAND TOTAL ########## -->
                             </table>
                         </div>
                     </div>
@@ -371,9 +382,16 @@
 
         <!-- Recent Challans -->
         <div class="bg-white rounded-xl shadow-sm border border-borderColor mb-8">
+            <!-- ########## START: MODIFICATION FOR RECENT CHALLAN SEARCH ########## -->
             <div class="p-6 border-b border-borderColor">
-                <h3 class="text-lg font-semibold text-secondary">Recent Challans</h3>
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <h3 class="text-lg font-semibold text-secondary">Recent Challans</h3>
+                    <div class="flex items-center">
+                        <input type="text" id="recentChallanSearchInput" oninput="updateChallansTable()" placeholder="চালান নাম্বার দিয়ে সার্চ করুন..." class="w-full sm:w-64 px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm">
+                    </div>
+                </div>
             </div>
+            <!-- ########## END: MODIFICATION FOR RECENT CHALLAN SEARCH ########## -->
             
             <div class="recent-challans-table">
                 <table class="min-w-full">
@@ -416,8 +434,8 @@
                             <option value="Gms Textiles Ltd">Gms Textiles Ltd</option>
                             <option value="Sewing Department">Sewing Department</option>
                             <option value="Finishing Department">Finishing Department</option>
-                            <option value="Quality Control">Quality Control</option>
-                            <option value="Export Department">Export Department</option>
+                            <option value="AOP">AOP</option>
+                            <option value="Dyeing Return">Dyeing Return</option>
                             <option value="Sample Department">Sample Department</option>
                         </select>
                         <select id="dateRangeFilter" onchange="handleDateRangeChange()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm">
@@ -562,6 +580,7 @@
         let editingChallanId = null;
         let billCounter = 1;
         let challansListener = null;
+        let counterListener = null; // <-- NEW: Listener for the counter
         
         // Password system
         const CORRECT_PASSWORD = 'gms1234';
@@ -652,6 +671,12 @@
                     window.dbOff(challansRef, 'value', challansListener);
                     challansListener = null;
                 }
+                // <-- NEW: Detach the counter listener on logout
+                if (counterListener) {
+                    const counterRef = window.dbRef(window.database, 'challanCounter');
+                    window.dbOff(counterRef, 'value', counterListener);
+                    counterListener = null;
+                }
                 
                 showLoginScreen();
             }
@@ -659,14 +684,44 @@
 
         // Initialize the system
         async function initializeSystem() {
-            await loadChallanCounter();
             await loadBillCounter();
-            generateChallanNumber();
             setCurrentDate();
             setupRealtimeListener();
+            setupCounterListener(); // <-- NEW: Setup the real-time listener for the counter
         }
 
-        // Load challan counter from Firebase
+        // <-- NEW: This function sets up a real-time listener for the challan counter
+        function setupCounterListener() {
+            try {
+                const counterRef = window.dbRef(window.database, 'challanCounter');
+                
+                // Remove existing listener if any
+                if (counterListener) {
+                    window.dbOff(counterRef, 'value', counterListener);
+                }
+                
+                // Set up new listener
+                counterListener = window.dbOnValue(counterRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        challanCounter = snapshot.val();
+                    } else {
+                        // If counter doesn't exist in DB, initialize it
+                        window.dbSet(counterRef, 1);
+                        challanCounter = 1;
+                    }
+                    // Regenerate the challan number in the UI, but only if not in edit mode
+                    if (!isEditMode) {
+                        generateChallanNumber();
+                    }
+                }, (error) => {
+                    console.error('Error in counter listener:', error);
+                });
+            } catch (error) {
+                console.error('Error setting up counter listener:', error);
+            }
+        }
+
+        // Load challan counter from Firebase (This is now mainly for initialization if needed)
         async function loadChallanCounter() {
             try {
                 const counterRef = window.dbRef(window.database, 'challanCounter');
@@ -686,8 +741,10 @@
         // Update challan counter in Firebase
         async function updateChallanCounter() {
             try {
+                // The new value should be the current challanCounter value, which is fetched in real-time
+                const nextChallanNumber = challanCounter + 1;
                 const counterRef = window.dbRef(window.database, 'challanCounter');
-                await window.dbSet(counterRef, challanCounter + 1);
+                await window.dbSet(counterRef, nextChallanNumber);
             } catch (error) {
                 console.error('Error updating challan counter:', error);
             }
@@ -715,13 +772,15 @@
             try {
                 const counterRef = window.dbRef(window.database, 'billCounter');
                 await window.dbSet(counterRef, billCounter + 1);
-            } catch (error) {
+            } catch (error)
+            {
                 console.error('Error updating bill counter:', error);
             }
         }
 
         // Convert number to words function
-        function numberToWords(num) {
+        // MODIFIED FUNCTION
+        function numberToWords(num, currency = 'BDT') {
             if (num === 0) return 'Zero';
             
             const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
@@ -730,12 +789,10 @@
             
             function convertHundreds(n) {
                 let result = '';
-                
                 if (n >= 100) {
                     result += ones[Math.floor(n / 100)] + ' Hundred ';
                     n %= 100;
                 }
-                
                 if (n >= 20) {
                     result += tens[Math.floor(n / 10)] + ' ';
                     n %= 10;
@@ -743,11 +800,9 @@
                     result += teens[n - 10] + ' ';
                     return result;
                 }
-                
                 if (n > 0) {
                     result += ones[n] + ' ';
                 }
-                
                 return result;
             }
             
@@ -761,24 +816,15 @@
             let thousand = Math.floor(num / 1000);
             num %= 1000;
             
-            if (crore > 0) {
-                result += convertHundreds(crore) + 'Crore ';
-            }
+            if (crore > 0) result += convertHundreds(crore) + 'Crore ';
+            if (lakh > 0) result += convertHundreds(lakh) + 'Lakh ';
+            if (thousand > 0) result += convertHundreds(thousand) + 'Thousand ';
+            if (num > 0) result += convertHundreds(num);
             
-            if (lakh > 0) {
-                result += convertHundreds(lakh) + 'Lakh ';
-            }
-            
-            if (thousand > 0) {
-                result += convertHundreds(thousand) + 'Thousand ';
-            }
-            
-            if (num > 0) {
-                result += convertHundreds(num);
-            }
-            
-            return result.trim();
+            const currencyText = currency === 'USD' ? ' Dollar Only' : ' Taka Only';
+            return result.trim() + currencyText;
         }
+
 
         // Helper function to check if transport fields should be shown
         function shouldShowTransportFields(inputValue) {
@@ -792,8 +838,8 @@
                 'Unit - 2 (Cutting 07)',
                 'Sewing Department',
                 'Finishing Department',
-                'Quality Control',
-                'Export Department',
+                'AOP',
+                'Dyeing Return',
                 'Sample Department'
             ];
             
@@ -829,34 +875,19 @@
             const amountHeader = document.getElementById('amountHeader');
             const additionalNotesSection = document.getElementById('additionalNotesSection');
             
+            // Select all rate and amount cells, including headers and footers
+            const rateCells = document.querySelectorAll('.rate-cell');
+            const amountCells = document.querySelectorAll('.amount-cell');
+
             if (checkbox.checked) {
-                rateHeader.style.display = 'table-cell';
-                amountHeader.style.display = 'table-cell';
+                rateCells.forEach(cell => cell.style.display = 'table-cell');
+                amountCells.forEach(cell => cell.style.display = 'table-cell');
                 additionalNotesSection.classList.remove('hidden');
             } else {
-                rateHeader.style.display = 'none';
-                amountHeader.style.display = 'none';
+                rateCells.forEach(cell => cell.style.display = 'none');
+                amountCells.forEach(cell => cell.style.display = 'none');
                 additionalNotesSection.classList.add('hidden');
             }
-            
-            const tableRows = document.querySelectorAll('#fabricItemsTable tbody tr');
-            tableRows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 16) {
-                    const rateCell = cells[14];
-                    const amountCell = cells[15];
-                    
-                    if (rateCell && amountCell && rateCell.classList.contains('rate-cell')) {
-                        if (checkbox.checked) {
-                            rateCell.style.display = 'table-cell';
-                            amountCell.style.display = 'table-cell';
-                        } else {
-                            rateCell.style.display = 'none';
-                            amountCell.style.display = 'none';
-                        }
-                    }
-                }
-            });
         }
 
         // Calculate amount based on grey quantity and rate
@@ -871,11 +902,43 @@
                 const amount = greyQty * rate;
                 amountInput.value = amount.toFixed(2);
             }
+            updateGrandTotal(); // Update grand total whenever amount is calculated
         }
+
+        // ########## START: NEW FUNCTION FOR GRAND TOTAL ##########
+        function updateGrandTotal() {
+            const tableRows = document.querySelectorAll('#fabricItemsTable tbody tr');
+            let totalRolls = 0;
+            let totalGreyQty = 0;
+            let totalIssueQty = 0;
+            let totalAmount = 0;
+
+            tableRows.forEach(row => {
+                // Ensure it's a data row, not the "No items added" placeholder
+                if (row.cells.length > 1) {
+                    const rollsInput = row.cells[10].querySelector('input');
+                    const greyQtyInput = row.cells[12].querySelector('input');
+                    const issueQtyInput = row.cells[13].querySelector('input');
+                    const amountInput = row.cells[15].querySelector('input');
+
+                    if (rollsInput) totalRolls += parseInt(rollsInput.value) || 0;
+                    if (greyQtyInput) totalGreyQty += parseFloat(greyQtyInput.value) || 0;
+                    if (issueQtyInput) totalIssueQty += parseFloat(issueQtyInput.value) || 0;
+                    if (amountInput) totalAmount += parseFloat(amountInput.value) || 0;
+                }
+            });
+
+            document.getElementById('totalRolls').textContent = totalRolls;
+            document.getElementById('totalGreyQty').textContent = totalGreyQty.toFixed(2);
+            document.getElementById('totalIssueQty').textContent = totalIssueQty.toFixed(2);
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+        }
+        // ########## END: NEW FUNCTION FOR GRAND TOTAL ##########
 
         // Generate challan number
         function generateChallanNumber() {
             const currentYear = new Date().getFullYear().toString().slice(-2);
+            // Uses the real-time `challanCounter` variable
             const challanNumber = `GMS-${currentYear}-${String(challanCounter).padStart(6, '0')}`;
             document.getElementById('challanNumber').value = challanNumber;
         }
@@ -887,9 +950,9 @@
         }
 
         // Add fabric item row
+        // MODIFIED FUNCTION
         function addFabricItem() {
             const tableBody = document.querySelector('#fabricItemsTable tbody');
-            const checkbox = document.getElementById('toggleRateAmount');
             
             if (tableBody.children.length === 1 && tableBody.children[0].children[0].colSpan === 18) {
                 tableBody.innerHTML = '';
@@ -900,6 +963,7 @@
             if (existingRows.length > 0) {
                 const lastRow = existingRows[existingRows.length - 1];
                 const inputs = lastRow.querySelectorAll('input');
+                const selects = lastRow.querySelectorAll('select');
                 if (inputs.length > 0) {
                     lastRowData = {
                         issueType: inputs[0].value || '',
@@ -917,6 +981,7 @@
                         greyQty: '',
                         issueQty: '',
                         rate: inputs[14] ? inputs[14].value || '' : '',
+                        currency: selects.length > 0 ? selects[0].value : 'BDT',
                         amount: '',
                         remarks: inputs[inputs.length - 2] ? inputs[inputs.length - 2].value || '' : ''
                     };
@@ -927,7 +992,8 @@
             row.style.backgroundColor = itemCounter % 2 === 0 ? '#D6EEEE' : 'white';
             row.className = 'fade-in';
             
-            const rateAmountDisplay = checkbox.checked ? 'table-cell' : 'none';
+            const isRateAmountVisible = document.getElementById('toggleRateAmount').checked;
+            const rateAmountDisplay = isRateAmountVisible ? 'table-cell' : 'none';
             
             row.innerHTML = `
                 <td style="border: 1px solid #dddddd; padding: 8px;">
@@ -961,7 +1027,7 @@
                     <input type="text" list="locationList" value="${lastRowData.location || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Location">
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px;">
-                    <input type="number" value="${lastRowData.rolls || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rolls">
+                    <input type="number" value="${lastRowData.rolls || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rolls" oninput="updateGrandTotal()">
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px;">
                     <input type="text" list="uomList" value="${lastRowData.uom || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="UOM">
@@ -970,16 +1036,22 @@
                     <input type="number" step="0.01" value="${lastRowData.greyQty || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Grey Qty" oninput="calculateAmount(this.closest('tr'))">
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px;">
-                    <input type="number" step="0.01" value="${lastRowData.issueQty || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Issue Qty">
+                    <input type="number" step="0.01" value="${lastRowData.issueQty || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Issue Qty" oninput="updateGrandTotal()">
                 </td>
                 <td class="rate-cell" style="border: 1px solid #dddddd; padding: 8px; display: ${rateAmountDisplay};">
-                    <input type="number" step="0.01" value="${lastRowData.rate || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="number" step="0.01" value="${lastRowData.rate || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
+                        <select class="currency-select" style="border: none; background: transparent;">
+                            <option value="BDT" ${lastRowData.currency === 'BDT' ? 'selected' : ''}>BDT</option>
+                            <option value="USD" ${lastRowData.currency === 'USD' ? 'selected' : ''}>USD</option>
+                        </select>
+                    </div>
                 </td>
                 <td class="amount-cell" style="border: 1px solid #dddddd; padding: 8px; display: ${rateAmountDisplay};">
                     <input type="number" step="0.01" value="${lastRowData.amount || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Amount" readonly>
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px;">
-                    <input type="text" value="${lastRowData.remarks || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Remarks">
+                    <input type="text" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Remarks">
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px; text-align: center;">
                     <button type="button" onclick="removeFabricItem(this)" style="padding: 6px 12px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
@@ -990,6 +1062,7 @@
             
             tableBody.appendChild(row);
             itemCounter++;
+            updateGrandTotal();
         }
 
         // Remove fabric item row
@@ -1007,6 +1080,7 @@
                     </tr>
                 `;
             }
+            updateGrandTotal();
         }
 
         // Search challan function
@@ -1068,12 +1142,15 @@
             document.getElementById('issueTo').value = challan.issueTo;
             document.getElementById('contactNumber').value = challan.contactNumber || '';
             
+            // Clear existing state before loading new
+            document.getElementById('toggleRateAmount').checked = false;
+
             // Load additional notes if available
-            if (challan.additionalNotes) {
-                document.getElementById('additionalNotes').value = challan.additionalNotes;
+            if (challan.additionalNotes || (challan.items && challan.items.some(item => item.rate || item.amount))) {
+                document.getElementById('additionalNotes').value = challan.additionalNotes || '';
                 document.getElementById('toggleRateAmount').checked = true;
-                toggleRateAmountColumns();
             }
+            toggleRateAmountColumns(); // Apply visibility based on checkbox state
             
             if (challan.gmsFields) {
                 toggleGmsFields();
@@ -1091,18 +1168,21 @@
             challan.items.forEach(item => {
                 addFabricItemWithData(item);
             });
+
+            updateGrandTotal(); // Calculate total for loaded items
         }
 
         // Add fabric item with existing data
+        // MODIFIED FUNCTION
         function addFabricItemWithData(itemData) {
             const tableBody = document.querySelector('#fabricItemsTable tbody');
-            const checkbox = document.getElementById('toggleRateAmount');
+            const isRateAmountVisible = document.getElementById('toggleRateAmount').checked;
             
             const row = document.createElement('tr');
             row.style.backgroundColor = itemCounter % 2 === 0 ? '#D6EEEE' : 'white';
             row.className = 'fade-in';
             
-            const rateAmountDisplay = checkbox.checked ? 'table-cell' : 'none';
+            const rateAmountDisplay = isRateAmountVisible ? 'table-cell' : 'none';
             
             row.innerHTML = `
                 <td style="border: 1px solid #dddddd; padding: 8px;">
@@ -1136,7 +1216,7 @@
                     <input type="text" list="locationList" value="${itemData.location || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Location">
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px;">
-                    <input type="number" value="${itemData.rolls || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rolls">
+                    <input type="number" value="${itemData.rolls || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rolls" oninput="updateGrandTotal()">
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px;">
                     <input type="text" list="uomList" value="${itemData.uom || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="UOM">
@@ -1145,10 +1225,16 @@
                     <input type="number" step="0.01" value="${itemData.greyQty || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Grey Qty" oninput="calculateAmount(this.closest('tr'))">
                 </td>
                 <td style="border: 1px solid #dddddd; padding: 8px;">
-                    <input type="number" step="0.01" value="${itemData.issueQty || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Issue Qty">
+                    <input type="number" step="0.01" value="${itemData.issueQty || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Issue Qty" oninput="updateGrandTotal()">
                 </td>
                 <td class="rate-cell" style="border: 1px solid #dddddd; padding: 8px; display: ${rateAmountDisplay};">
-                    <input type="number" step="0.01" value="${itemData.rate || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="number" step="0.01" value="${itemData.rate || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
+                        <select class="currency-select" style="border: none; background: transparent;">
+                            <option value="BDT" ${itemData.currency === 'BDT' ? 'selected' : ''}>BDT</option>
+                            <option value="USD" ${itemData.currency === 'USD' ? 'selected' : ''}>USD</option>
+                        </select>
+                    </div>
                 </td>
                 <td class="amount-cell" style="border: 1px solid #dddddd; padding: 8px; display: ${rateAmountDisplay};">
                     <input type="number" step="0.01" value="${itemData.amount || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Amount" readonly>
@@ -1178,6 +1264,7 @@
             document.getElementById('searchStatus').innerHTML = '';
             
             resetForm();
+            generateChallanNumber(); // <-- Regenerate number after clearing
         }
 
         // Setup real-time listener for challans
@@ -1246,6 +1333,7 @@
         }
 
         // Create challan
+        // MODIFIED FUNCTION
         async function createChallan(event) {
             event.preventDefault();
             
@@ -1272,6 +1360,7 @@
             
             tableRows.forEach(row => {
                 const inputs = row.querySelectorAll('input');
+                const selects = row.querySelectorAll('select');
                 if (inputs.length > 0) {
                     const item = {
                         issueType: inputs[0].value,
@@ -1289,8 +1378,9 @@
                         greyQty: inputs[12].value,
                         issueQty: inputs[13].value,
                         rate: inputs[14] ? inputs[14].value : '',
+                        currency: selects.length > 0 ? selects[0].value : 'BDT',
                         amount: inputs[15] ? inputs[15].value : '',
-                        remarks: inputs[16] ? inputs[16].value : inputs[14].value
+                        remarks: inputs[16] ? inputs[16].value : ''
                     };
                     
                     if (item.issueType || item.buyer || item.fabricType) {
@@ -1321,12 +1411,13 @@
             try {
                 if (isEditMode && editingChallanId) {
                     const challanRef = window.dbRef(window.database, `challans/${editingChallanId}`);
-                    await window.dbSet(challanRef, challan);
-                    
-                    const index = challans.findIndex(c => c.challanNumber === challanNumber);
-                    if (index !== -1) {
-                        challans[index] = challan;
+                    // When updating, preserve the existing challan number and creation date
+                    const existingChallan = challans.find(c => c.challanNumber === challan.challanNumber);
+                    if (existingChallan) {
+                        challan.createdAt = existingChallan.createdAt;
+                        challan.billNumber = existingChallan.billNumber; // Preserve bill number on update
                     }
+                    await window.dbSet(challanRef, challan);
                     
                     alert(`Challan ${challanNumber} updated successfully!`);
                 } else {
@@ -1334,28 +1425,20 @@
                     const newChallanRef = window.dbPush(challansRef);
                     await window.dbSet(newChallanRef, challan);
                     
-                    await updateChallanCounter();
-                    
-                    challans.push(challan);
+                    // The counter will now be updated for all users
+                    await updateChallanCounter(); 
                     
                     alert(`Challan ${challanNumber} created and saved to Firebase successfully!`);
                 }
                 
-                updateChallansTable();
-                updateIssueReport();
-                
                 resetForm();
-                
-                if (!isEditMode) {
-                    challanCounter++;
-                    generateChallanNumber();
-                }
                 
             } catch (error) {
                 console.error('Error saving challan to Firebase:', error);
                 alert('Error saving challan to Firebase. Please try again.');
             }
         }
+
 
         // Reset form
         function resetForm() {
@@ -1366,9 +1449,8 @@
             document.getElementById('editModeIndicator').classList.add('hidden');
             document.getElementById('submitButton').textContent = 'Create Challan';
             
-            if (!isEditMode) {
-                generateChallanNumber();
-            }
+            // The listener will automatically call generateChallanNumber if not in edit mode
+            
             setCurrentDate();
             
             document.getElementById('gmsTextileFields').classList.add('hidden');
@@ -1384,12 +1466,17 @@
             `;
             
             itemCounter = 1;
+            updateGrandTotal(); // Reset totals to 0
         }
 
+        // ########## START: MODIFIED FUNCTION TO FIX MISSING CHALLAN & ADD SEARCH ##########
         // Update challans table
         function updateChallansTable() {
             const tableBody = document.getElementById('challansTable');
-            
+            const searchInput = document.getElementById('recentChallanSearchInput');
+            // লাইভ সার্চ করার জন্য সার্চ ইনপুট থেকে মান নেওয়া হচ্ছে
+            const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
             if (challans.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
@@ -1400,32 +1487,38 @@
                 `;
                 return;
             }
+
+            let displayChallans = [...challans];
+
+            // যদি সার্চবক্সে কিছু লেখা থাকে, তাহলে চালানগুলো ফিল্টার করা হবে
+            if (searchTerm) {
+                displayChallans = displayChallans.filter(challan => 
+                    challan.challanNumber && challan.challanNumber.toLowerCase().includes(searchTerm)
+                );
+            }
             
-            const challansByDate = {};
-            const sortedChallans = [...challans].sort((a, b) => new Date(b.createdAt || b.invoiceDate) - new Date(a.createdAt || a.invoiceDate));
+            // চালানগুলোকে নতুন থেকে পুরানো অনুযায়ী সাজানো হচ্ছে
+            displayChallans.sort((a, b) => new Date(b.createdAt || b.invoiceDate) - new Date(a.createdAt || a.invoiceDate));
+
+            // যদি সার্চ করা না হয়, তাহলে শুধুমাত্র সাম্প্রতিক ২০টি চালান দেখানো হবে
+            if (!searchTerm) {
+                displayChallans = displayChallans.slice(0, 20);
+            }
             
-            sortedChallans.forEach(challan => {
-                const dateKey = challan.invoiceDate;
-                if (!challansByDate[dateKey]) {
-                    challansByDate[dateKey] = [];
-                }
-                
-                if (challansByDate[dateKey].length < 5) {
-                    const isUnique = !challansByDate[dateKey].some(existing => existing.challanNumber === challan.challanNumber);
-                    if (isUnique) {
-                        challansByDate[dateKey].push(challan);
-                    }
-                }
-            });
+            // যদি ফিল্টার করার পর কোনো চালান না পাওয়া যায়
+            if (displayChallans.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-textSecondary">
+                           '${searchTerm}' এর জন্য কোনো চালান খুঁজে পাওয়া যায়নি।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
             
-            const limitedChallans = [];
-            Object.keys(challansByDate)
-                .sort((a, b) => new Date(b) - new Date(a))
-                .forEach(date => {
-                    limitedChallans.push(...challansByDate[date]);
-                });
-            
-            tableBody.innerHTML = limitedChallans.map((challan, index) => `
+            // টেবিলে চালানগুলো দেখানো হচ্ছে
+            tableBody.innerHTML = displayChallans.map((challan, index) => `
                 <tr class="hover-row ${index % 2 === 0 ? 'table-row-even' : 'table-row-odd'}">
                     <td class="px-6 py-4 text-sm font-medium text-secondary">${challan.challanNumber}</td>
                     <td class="px-6 py-4 text-sm text-textSecondary">${challan.receiverName}</td>
@@ -1441,6 +1534,7 @@
                 </tr>
             `).join('');
         }
+        // ########## END: MODIFIED FUNCTION ##########
 
         // Update issue report
         function updateIssueReport() {
@@ -2397,6 +2491,7 @@
         }
 
         // Print Bill function
+        // MODIFIED FUNCTION
         async function printBill(challanNumber) {
             const challan = challans.find(c => c.challanNumber === challanNumber);
             if (!challan) return;
@@ -2433,8 +2528,11 @@
                 }
             }
 
-            // Calculate total amount
+            // Calculate total amount and determine currency
             const totalAmount = challan.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+            const currencyType = challan.items.length > 0 ? (challan.items[0].currency || 'BDT') : 'BDT';
+            const currencySymbol = currencyType === 'USD' ? '$' : '৳';
+
 
             const printWindow = window.open('', '_blank');
             const printContent = `
@@ -2651,14 +2749,16 @@
                                 <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">Location</th>
                                 <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">Rolls</th>
                                 <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">UOM</th>
-                                <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">Issue Qty</th>
+                                <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">Grey Qty</th>
                                 <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">Rate</th>
                                 <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">Amount</th>
                                 <th style="background-color: white; color: #000000; font-family: Arial, sans-serif;">Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${challan.items.map((item, index) => `
+                            ${challan.items.map((item, index) => {
+                                const itemCurrencySymbol = item.currency === 'USD' ? '$' : '৳';
+                                return `
                                 <tr style="background-color: ${index % 2 === 0 ? '#D6EEEE' : 'white'};">
                                     <td style="text-align: center; font-family: Arial, sans-serif;">${index + 1}</td>
                                     <td style="font-family: Arial, sans-serif;">${item.issueType || '-'}</td>
@@ -2673,19 +2773,19 @@
                                     <td style="font-family: Arial, sans-serif;">${item.location || '-'}</td>
                                     <td style="text-align: center; font-family: Arial, sans-serif;">${item.rolls || '-'}</td>
                                     <td style="font-family: Arial, sans-serif;">${item.uom || '-'}</td>
-                                    <td style="text-align: right; font-family: Arial, sans-serif;">${item.issueQty || '-'}</td>
-                                    <td style="text-align: right; font-family: Arial, sans-serif;">${item.rate || '-'}</td>
-                                    <td style="text-align: right; font-family: Arial, sans-serif;">${item.amount || '-'}</td>
+                                    <td style="text-align: right; font-family: Arial, sans-serif;">${item.greyQty || '-'}</td>
+                                    <td style="text-align: right; font-family: Arial, sans-serif;">${itemCurrencySymbol} ${item.rate || '-'}</td>
+                                    <td style="text-align: right; font-family: Arial, sans-serif;">${itemCurrencySymbol} ${item.amount || '-'}</td>
                                     <td style="font-family: Arial, sans-serif;">${item.remarks || '-'}</td>
                                 </tr>
-                            `).join('')}
+                                `}).join('')}
                             <tr class="subtotal-row">
                                 <td colspan="11" style="text-align: right; padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">SUBTOTAL:</td>
                                 <td style="text-align: center; padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">${challan.items.reduce((sum, item) => sum + (parseInt(item.rolls) || 0), 0)}</td>
                                 <td style="padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">-</td>
-                                <td style="text-align: right; padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">${challan.items.reduce((sum, item) => sum + (parseFloat(item.issueQty) || 0), 0).toFixed(2)}</td>
+                                <td style="text-align: right; padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">${challan.items.reduce((sum, item) => sum + (parseFloat(item.greyQty) || 0), 0).toFixed(2)}</td>
                                 <td style="padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">-</td>
-                                <td style="text-align: right; padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">৳ ${totalAmount.toFixed(2)}</td>
+                                <td style="text-align: right; padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">${currencySymbol} ${totalAmount.toFixed(2)}</td>
                                 <td style="padding: 12px; font-family: Arial, sans-serif; border: 2px solid #000;">Total Items: ${challan.items.length}</td>
                             </tr>
                         </tbody>
@@ -2694,11 +2794,11 @@
                     <div class="total-section">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <div style="font-size: 16px; font-weight: bold;">
-                                Total Amount: ৳ ${totalAmount.toFixed(2)}
+                                Total Amount: ${currencySymbol} ${totalAmount.toFixed(2)}
                             </div>
                         </div>
                         <div style="font-size: 14px; font-weight: bold; border-top: 1px solid #000; padding-top: 10px;">
-                            Amount In Words: ${numberToWords(totalAmount)} Taka Only
+                            Amount In Words: ${numberToWords(totalAmount, currencyType)}
                         </div>
                     </div>
 
@@ -2763,10 +2863,6 @@
                             await window.dbSet(challanRef, null);
                         }
                     }
-                    
-                    challans = challans.filter(c => c.challanNumber !== challanNumber);
-                    updateChallansTable();
-                    updateIssueReport();
                     
                     alert(`Challan ${challanNumber} deleted successfully!`);
                 } catch (error) {
@@ -2844,8 +2940,4 @@
         });
     </script>
 </body>
-</html>
-    
-  </body>
-  
 </html>
