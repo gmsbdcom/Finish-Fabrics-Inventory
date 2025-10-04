@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="UTF-8">
-    <title>last up</title>
+    <title>FINISH FABRICS LAST UP</title>
     
 
   </head>
@@ -20,8 +20,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Firebase SDK -->
     <script type="module">
+        // ########## START: MODIFICATION FOR ATOMIC COUNTER ##########
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, get, push, update, onValue, off } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, set, get, push, update, onValue, off, runTransaction } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
         
         const firebaseConfig = {
             databaseURL: "https://finish-fabrics-default-rtdb.firebaseio.com/"
@@ -36,6 +37,8 @@
         window.dbUpdate = update;
         window.dbOnValue = onValue;
         window.dbOff = off;
+        window.dbRunTransaction = runTransaction; // <-- Make transaction function globally available
+        // ########## END: MODIFICATION FOR ATOMIC COUNTER ##########
     </script>
     <style>
         body {
@@ -426,82 +429,93 @@
                 </table>
             </div>
         </div>
-
-        <!-- Issue-wise Detailed Report -->
-        <div class="bg-white rounded-xl shadow-sm border border-borderColor mb-8">
-            <div class="p-6 border-b border-borderColor">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-                    <h3 class="text-lg font-semibold text-secondary">Issue-wise Detailed Report</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <select id="issueDestinationFilter" onchange="applyFilters()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm">
-                            <option value="">All Issue Destinations</option>
-                            <option value="Cutting 01">Cutting 01</option>
-                            <option value="Cutting 02">Cutting 02</option>
-                            <option value="Cutting 03">Cutting 03</option>
-                            <option value="Cutting 04">Cutting 04</option>
-                            <option value="Cutting 05">Cutting 05</option>
-                            <option value="Unit - 2 (Cutting 06)">Unit - 2 (Cutting 06)</option>
-                            <option value="Unit - 2 (Cutting 07)">Unit - 2 (Cutting 07)</option>
-                            <option value="Gms Textiles Ltd">Gms Textiles Ltd</option>
-                            <option value="Sewing Department">Sewing Department</option>
-                            <option value="Finishing Department">Finishing Department</option>
-                            <option value="AOP">AOP</option>
-                            <option value="Dyeing Return">Dyeing Return</option>
-                            <option value="Sample Department">Sample Department</option>
-                        </select>
-                        <select id="dateRangeFilter" onchange="handleDateRangeChange()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm">
-                            <option value="">All Dates</option>
-                            <option value="today">Today</option>
-                            <option value="yesterday">Yesterday</option>
-                            <option value="last7days">Last 7 Days</option>
-                            <option value="last30days">Last 30 Days</option>
-                            <option value="thisMonth">This Month</option>
-                            <option value="lastMonth">Last Month</option>
-                            <option value="custom">Custom Range</option>
-                        </select>
-                        <div id="customDateRange" class="hidden flex gap-2">
-                            <input type="date" id="startDate" onchange="applyFilters()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm" placeholder="Start Date">
-                            <input type="date" id="endDate" onchange="applyFilters()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm" placeholder="End Date">
+        
+        <!-- ########## START: MODIFICATION FOR REPORT BUTTON ########## -->
+        <!-- Button to toggle the report -->
+        <div class="my-8 text-center">
+            <button onclick="toggleIssueReport()" id="toggleReportButton" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium">
+                Show Issue-wise Report
+            </button>
+        </div>
+        
+        <!-- Issue-wise Detailed Report Container (hidden by default) -->
+        <div id="issueReportContainer" class="hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-borderColor mb-8">
+                <div class="p-6 border-b border-borderColor">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                        <h3 class="text-lg font-semibold text-secondary">Issue-wise Detailed Report</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="issueDestinationFilter" onchange="applyFilters()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm">
+                                <option value="">All Issue Destinations</option>
+                                <option value="Cutting 01">Cutting 01</option>
+                                <option value="Cutting 02">Cutting 02</option>
+                                <option value="Cutting 03">Cutting 03</option>
+                                <option value="Cutting 04">Cutting 04</option>
+                                <option value="Cutting 05">Cutting 05</option>
+                                <option value="Unit - 2 (Cutting 06)">Unit - 2 (Cutting 06)</option>
+                                <option value="Unit - 2 (Cutting 07)">Unit - 2 (Cutting 07)</option>
+                                <option value="Gms Textiles Ltd">Gms Textiles Ltd</option>
+                                <option value="Sewing Department">Sewing Department</option>
+                                <option value="Finishing Department">Finishing Department</option>
+                                <option value="AOP">AOP</option>
+                                <option value="Dyeing Return">Dyeing Return</option>
+                                <option value="Sample Department">Sample Department</option>
+                            </select>
+                            <select id="dateRangeFilter" onchange="handleDateRangeChange()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm">
+                                <option value="">All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last7days">Last 7 Days</option>
+                                <option value="last30days">Last 30 Days</option>
+                                <option value="thisMonth">This Month</option>
+                                <option value="lastMonth">Last Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                            <div id="customDateRange" class="hidden flex gap-2">
+                                <input type="date" id="startDate" onchange="applyFilters()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm" placeholder="Start Date">
+                                <input type="date" id="endDate" onchange="applyFilters()" class="px-3 py-2 border border-borderColor rounded-lg focus:ring-1 focus:ring-primary focus:border-transparent text-sm" placeholder="End Date">
+                            </div>
+                            <button onclick="clearAllFilters()" class="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 text-sm">
+                                Clear
+                            </button>
+                            <button onclick="exportIssueReport()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Export Report</span>
+                            </button>
                         </div>
-                        <button onclick="clearAllFilters()" class="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 text-sm">
-                            Clear
-                        </button>
-                        <button onclick="exportIssueReport()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2 text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <span>Export Report</span>
-                        </button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="table-container">
-                <table class="min-w-full">
-                    <thead class="sticky top-0">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Destination</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Type</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Buyer</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Fabric Type</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Color</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Rolls</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Qty</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">UOM</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Challan No</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="issueReportTable">
-                        <tr>
-                            <td colspan="10" class="px-6 py-8 text-center text-textSecondary">
-                                No data available. Create some challans to see the report.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                
+                <div class="table-container">
+                    <table class="min-w-full">
+                        <thead class="sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Destination</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Buyer</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Fabric Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Color</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Rolls</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Qty</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">UOM</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Challan No</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="issueReportTable">
+                            <tr>
+                                <td colspan="10" class="px-6 py-8 text-center text-textSecondary">
+                                    No data available. Create some challans to see the report.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+        <!-- ########## END: MODIFICATION FOR REPORT BUTTON ########## -->
 
         <!-- Real-time Update Notification -->
         <div id="updateNotification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50 hidden">
@@ -878,6 +892,22 @@
                 document.getElementById('lockNo').value = '';
             }
         }
+        
+        // ########## START: NEW JAVASCRIPT FUNCTION FOR REPORT BUTTON ##########
+        // Toggle Issue-wise Report visibility
+        function toggleIssueReport() {
+            const reportContainer = document.getElementById('issueReportContainer');
+            const toggleButton = document.getElementById('toggleReportButton');
+            
+            reportContainer.classList.toggle('hidden');
+            
+            if (reportContainer.classList.contains('hidden')) {
+                toggleButton.textContent = 'Show Issue-wise Report';
+            } else {
+                toggleButton.textContent = 'Hide Issue-wise Report';
+            }
+        }
+        // ########## END: NEW JAVASCRIPT FUNCTION FOR REPORT BUTTON ##########
 
         // Toggle Rate and Amount columns
         function toggleRateAmountColumns() {
@@ -1051,7 +1081,7 @@
                 </td>
                 <td class="rate-cell" style="border: 1px solid #dddddd; padding: 8px; display: ${rateAmountDisplay};">
                     <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="number" step="0.01" value="${lastRowData.rate || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
+                        <input type="number" step="0.01" value="${lastRowData.rate || ''}" style="flex-grow: 1; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
                         <select class="currency-select" style="border: none; background: transparent;">
                             <option value="BDT" ${lastRowData.currency === 'BDT' ? 'selected' : ''}>BDT</option>
                             <option value="USD" ${lastRowData.currency === 'USD' ? 'selected' : ''}>USD</option>
@@ -1240,7 +1270,7 @@
                 </td>
                 <td class="rate-cell" style="border: 1px solid #dddddd; padding: 8px; display: ${rateAmountDisplay};">
                     <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="number" step="0.01" value="${itemData.rate || ''}" style="width: 100%; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
+                        <input type="number" step="0.01" value="${itemData.rate || ''}" style="flex-grow: 1; padding: 8px; border: none; background: transparent; outline: none;" placeholder="Rate" oninput="calculateAmount(this.closest('tr'))">
                         <select class="currency-select" style="border: none; background: transparent;">
                             <option value="BDT" ${itemData.currency === 'BDT' ? 'selected' : ''}>BDT</option>
                             <option value="USD" ${itemData.currency === 'USD' ? 'selected' : ''}>USD</option>
@@ -1343,18 +1373,15 @@
             }
         }
 
-        // Create challan
-        // MODIFIED FUNCTION
+        // ########## START: MODIFICATION TO FIX CHALLAN NUMBER RACE CONDITION ##########
         async function createChallan(event) {
             event.preventDefault();
             
-            const challanNumber = document.getElementById('challanNumber').value;
+            // 1. Gather all form data first, except for the challan number
             const invoiceDate = document.getElementById('invoiceDate').value;
             const receiverName = document.getElementById('receiverName').value;
             const issueTo = document.getElementById('issueTo').value;
             const contactNumber = document.getElementById('contactNumber').value;
-            
-            // Get additional notes if available
             const additionalNotes = document.getElementById('toggleRateAmount').checked ? 
                 document.getElementById('additionalNotes').value : '';
             
@@ -1404,42 +1431,77 @@
                 alert('Please add at least one fabric item.');
                 return;
             }
-            
-            const challan = {
-                challanNumber,
-                invoiceDate,
-                receiverName,
-                issueTo,
-                contactNumber,
-                gmsFields: shouldShowTransportFields(issueTo.trim()) ? gmsFields : null,
-                items,
-                additionalNotes: additionalNotes,
-                billNumber: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            
+
             try {
                 if (isEditMode && editingChallanId) {
+                    // --- EDIT MODE LOGIC --- (This part remains the same)
+                    const challanNumber = document.getElementById('challanNumber').value;
+                    const challan = {
+                        challanNumber,
+                        invoiceDate,
+                        receiverName,
+                        issueTo,
+                        contactNumber,
+                        gmsFields: shouldShowTransportFields(issueTo.trim()) ? gmsFields : null,
+                        items,
+                        additionalNotes: additionalNotes,
+                        updatedAt: new Date().toISOString()
+                    };
+
                     const challanRef = window.dbRef(window.database, `challans/${editingChallanId}`);
-                    // When updating, preserve the existing challan number and creation date
                     const existingChallan = challans.find(c => c.challanNumber === challan.challanNumber);
                     if (existingChallan) {
                         challan.createdAt = existingChallan.createdAt;
-                        challan.billNumber = existingChallan.billNumber; // Preserve bill number on update
+                        challan.billNumber = existingChallan.billNumber;
                     }
                     await window.dbSet(challanRef, challan);
-                    
                     alert(`Challan ${challanNumber} updated successfully!`);
+
                 } else {
+                    // --- NEW CHALLAN CREATION LOGIC WITH TRANSACTION ---
+                    const counterRef = window.dbRef(window.database, 'challanCounter');
+                    
+                    // Atomically increment the counter and get the new value
+                    const transactionResult = await window.dbRunTransaction(counterRef, (currentData) => {
+                        if (currentData === null || currentData < 1) {
+                            return 2; // If counter is missing or invalid, the next one is 2, so we use 1.
+                        }
+                        return currentData + 1;
+                    });
+
+                    if (!transactionResult.committed) {
+                        throw new Error('Challan counter transaction was aborted. Please try again.');
+                    }
+
+                    // Use the number *before* the increment for the current challan
+                    const nextCounterValue = transactionResult.snapshot.val();
+                    const challanSequenceNumber = nextCounterValue - 1;
+
+                    // Generate the guaranteed unique challan number
+                    const currentYear = new Date().getFullYear().toString().slice(-2);
+                    const newChallanNumber = `GMS-${currentYear}-${String(challanSequenceNumber).padStart(6, '0')}`;
+
+                    // Build the final challan object with the unique number
+                    const challan = {
+                        challanNumber: newChallanNumber,
+                        invoiceDate,
+                        receiverName,
+                        issueTo,
+                        contactNumber,
+                        gmsFields: shouldShowTransportFields(issueTo.trim()) ? gmsFields : null,
+                        items,
+                        additionalNotes: additionalNotes,
+                        billNumber: null,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    
+                    // Save the new challan
                     const challansRef = window.dbRef(window.database, 'challans');
                     const newChallanRef = window.dbPush(challansRef);
                     await window.dbSet(newChallanRef, challan);
                     
-                    // The counter will now be updated for all users
-                    await updateChallanCounter(); 
-                    
-                    alert(`Challan ${challanNumber} created and saved to Firebase successfully!`);
+                    alert(`Challan ${newChallanNumber} created and saved to Firebase successfully!`);
                 }
                 
                 resetForm();
@@ -1449,6 +1511,7 @@
                 alert('Error saving challan to Firebase. Please try again.');
             }
         }
+        // ########## END: MODIFICATION ##########
 
 
         // Reset form
@@ -1743,7 +1806,7 @@
             `).join('');
             
             // Update filter status
-            updateFilterStatus(allItems.length, issueDestinationFilter, dateRangeFilter);
+            updateFilterStatus(allItems.length, issueDestinationFilter, dateFilter);
         }
 
         // Update filter status display
