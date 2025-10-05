@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="UTF-8">
-    <title>Finish Fabrics Inventory.20</title>
+    <title>FINISH FABRICS 2.1</title>
     
 
   </head>
@@ -492,9 +492,11 @@
                     <table class="min-w-full">
                         <thead class="sticky top-0">
                             <tr>
+                                <!-- ########## START: REPORT MODIFICATION ########## -->
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Destination</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Issue Type</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Buyer</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Store Ref.</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Fabric Type</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Color</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Rolls</th>
@@ -502,13 +504,16 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">UOM</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Challan No</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-black">Date</th>
+                                <!-- ########## END: REPORT MODIFICATION ########## -->
                             </tr>
                         </thead>
                         <tbody id="issueReportTable">
                             <tr>
-                                <td colspan="10" class="px-6 py-8 text-center text-textSecondary">
+                                <!-- ########## START: REPORT MODIFICATION ########## -->
+                                <td colspan="11" class="px-6 py-8 text-center text-textSecondary">
                                     No data available. Create some challans to see the report.
                                 </td>
+                                <!-- ########## END: REPORT MODIFICATION ########## -->
                             </tr>
                         </tbody>
                     </table>
@@ -1634,7 +1639,7 @@
             if (allItems.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="px-6 py-8 text-center text-textSecondary">
+                        <td colspan="11" class="px-6 py-8 text-center text-textSecondary">
                             No data available. Create some challans to see the report.
                         </td>
                     </tr>
@@ -1642,11 +1647,13 @@
                 return;
             }
             
+            // ########## START: REPORT MODIFICATION ##########
             tableBody.innerHTML = allItems.map((item, index) => `
                 <tr class="hover-row ${index % 2 === 0 ? 'table-row-even' : 'table-row-odd'}">
                     <td class="px-4 py-3 text-sm text-secondary">${item.issueDestination || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.issueType || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.buyer || '-'}</td>
+                    <td class="px-4 py-3 text-sm text-textSecondary">${item.storeRef || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.fabricType || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.color || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.rolls || '-'}</td>
@@ -1656,6 +1663,7 @@
                     <td class="px-4 py-3 text-sm text-textSecondary">${new Date(item.date).toLocaleDateString()}</td>
                 </tr>
             `).join('');
+            // ########## END: REPORT MODIFICATION ##########
         }
 
         // Handle date range change
@@ -1778,7 +1786,7 @@
             if (allItems.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="px-6 py-8 text-center text-textSecondary">
+                        <td colspan="11" class="px-6 py-8 text-center text-textSecondary">
                             ${issueDestinationFilter || dateRangeFilter ? 'No data matches the selected filters.' : 'No data available. Create some challans to see the report.'}
                         </td>
                     </tr>
@@ -1786,11 +1794,13 @@
                 return;
             }
             
+            // ########## START: REPORT MODIFICATION ##########
             tableBody.innerHTML = allItems.map((item, index) => `
                 <tr class="hover-row ${index % 2 === 0 ? 'table-row-even' : 'table-row-odd'}">
                     <td class="px-4 py-3 text-sm text-secondary">${item.issueDestination || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.issueType || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.buyer || '-'}</td>
+                    <td class="px-4 py-3 text-sm text-textSecondary">${item.storeRef || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.fabricType || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.color || '-'}</td>
                     <td class="px-4 py-3 text-sm text-textSecondary">${item.rolls || '-'}</td>
@@ -1800,6 +1810,7 @@
                     <td class="px-4 py-3 text-sm text-textSecondary">${new Date(item.date).toLocaleDateString()}</td>
                 </tr>
             `).join('');
+            // ########## END: REPORT MODIFICATION ##########
             
             // Update filter status
             updateFilterStatus(allItems.length, issueDestinationFilter, dateFilter);
@@ -1877,6 +1888,7 @@
                 return;
             }
 
+            // ########## START: REPORT MODIFICATION ##########
             // Create Excel content with proper formatting
             let excelContent = `
                 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -1956,14 +1968,14 @@
                 <body>
                     <table>
                         <tr>
-                            <td colspan="10" class="company-header">GMS COMPOSITE KNITTING IND LTD</td>
+                            <td colspan="11" class="company-header">GMS COMPOSITE KNITTING IND LTD</td>
                         </tr>
                         <tr>
-                            <td colspan="10" class="report-title">Issue-wise Detailed Report</td>
+                            <td colspan="11" class="report-title">Issue-wise Detailed Report</td>
                         </tr>
-                        ${issueDestinationFilter || dateRangeFilter ? `<tr><td colspan="10" class="filter-info">Filters Applied: ${issueDestinationFilter ? `Issue: ${issueDestinationFilter}` : ''}${issueDestinationFilter && dateRangeFilter ? ' | ' : ''}${dateRangeFilter ? `Date: ${dateRangeFilter}${dateRangeFilter === 'custom' && dateRange ? ` (${dateRange.start} to ${dateRange.end})` : ''}` : ''}</td></tr>` : ''}
+                        ${issueDestinationFilter || dateRangeFilter ? `<tr><td colspan="11" class="filter-info">Filters Applied: ${issueDestinationFilter ? `Issue: ${issueDestinationFilter}` : ''}${issueDestinationFilter && dateRangeFilter ? ' | ' : ''}${dateRangeFilter ? `Date: ${dateRangeFilter}${dateRangeFilter === 'custom' && dateRange ? ` (${dateRange.start} to ${dateRange.end})` : ''}` : ''}</td></tr>` : ''}
                         <tr>
-                            <td colspan="10" class="center-cell" style="background-color: #e9ecef; padding: 5px; font-size: 11px;">
+                            <td colspan="11" class="center-cell" style="background-color: #e9ecef; padding: 5px; font-size: 11px;">
                                 Generated on: ${new Date().toLocaleString('en-GB')} | Total Records: ${allItems.length}
                             </td>
                         </tr>
@@ -1971,6 +1983,7 @@
                             <th style="width: 150px;">Issue Destination</th>
                             <th style="width: 100px;">Issue Type</th>
                             <th style="width: 120px;">Buyer</th>
+                            <th style="width: 120px;">Store Ref.</th>
                             <th style="width: 120px;">Fabric Type</th>
                             <th style="width: 100px;">Color</th>
                             <th style="width: 80px;">Rolls</th>
@@ -1984,6 +1997,7 @@
                                 <td>${item.issueDestination || '-'}</td>
                                 <td>${item.issueType || '-'}</td>
                                 <td>${item.buyer || '-'}</td>
+                                <td>${item.storeRef || '-'}</td>
                                 <td>${item.fabricType || '-'}</td>
                                 <td>${item.color || '-'}</td>
                                 <td class="center-cell">${item.rolls || '-'}</td>
@@ -1994,7 +2008,7 @@
                             </tr>
                         `).join('')}
                         <tr style="background-color: #28a745; color: white; font-weight: bold;">
-                            <td colspan="5" class="center-cell" style="font-size: 14px;">TOTAL SUMMARY</td>
+                            <td colspan="6" class="center-cell" style="font-size: 14px;">TOTAL SUMMARY</td>
                             <td class="center-cell">${allItems.reduce((sum, item) => sum + (parseInt(item.rolls) || 0), 0)}</td>
                             <td class="number-cell">${allItems.reduce((sum, item) => sum + (parseFloat(item.issueQty) || 0), 0).toFixed(2)}</td>
                             <td colspan="3" class="center-cell">Total Items: ${allItems.length}</td>
@@ -2003,6 +2017,7 @@
                 </body>
                 </html>
             `;
+            // ########## END: REPORT MODIFICATION ##########
 
             // Create and download the file
             const blob = new Blob([excelContent], { 
