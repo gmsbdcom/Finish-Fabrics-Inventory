@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="UTF-8">
-    <title>FINISH FABRICS LAST UP</title>
+    <title>Finish Fabrics Inventory.20</title>
     
 
   </head>
@@ -1373,7 +1373,7 @@
             }
         }
 
-        // ########## START: MODIFICATION TO FIX CHALLAN NUMBER RACE CONDITION ##########
+        // ########## START: MODIFICATION TO FIX UNDEFINED BILLNUMBER ERROR ##########
         async function createChallan(event) {
             event.preventDefault();
             
@@ -1434,7 +1434,7 @@
 
             try {
                 if (isEditMode && editingChallanId) {
-                    // --- EDIT MODE LOGIC --- (This part remains the same)
+                    // --- EDIT MODE LOGIC ---
                     const challanNumber = document.getElementById('challanNumber').value;
                     const challan = {
                         challanNumber,
@@ -1452,7 +1452,8 @@
                     const existingChallan = challans.find(c => c.challanNumber === challan.challanNumber);
                     if (existingChallan) {
                         challan.createdAt = existingChallan.createdAt;
-                        challan.billNumber = existingChallan.billNumber;
+                        // ### FIX: Ensure billNumber is not undefined. Set to null if it doesn't exist. ###
+                        challan.billNumber = existingChallan.billNumber || null; 
                     }
                     await window.dbSet(challanRef, challan);
                     alert(`Challan ${challanNumber} updated successfully!`);
@@ -1461,10 +1462,9 @@
                     // --- NEW CHALLAN CREATION LOGIC WITH TRANSACTION ---
                     const counterRef = window.dbRef(window.database, 'challanCounter');
                     
-                    // Atomically increment the counter and get the new value
                     const transactionResult = await window.dbRunTransaction(counterRef, (currentData) => {
                         if (currentData === null || currentData < 1) {
-                            return 2; // If counter is missing or invalid, the next one is 2, so we use 1.
+                            return 2; 
                         }
                         return currentData + 1;
                     });
@@ -1473,15 +1473,12 @@
                         throw new Error('Challan counter transaction was aborted. Please try again.');
                     }
 
-                    // Use the number *before* the increment for the current challan
                     const nextCounterValue = transactionResult.snapshot.val();
                     const challanSequenceNumber = nextCounterValue - 1;
 
-                    // Generate the guaranteed unique challan number
                     const currentYear = new Date().getFullYear().toString().slice(-2);
                     const newChallanNumber = `GMS-${currentYear}-${String(challanSequenceNumber).padStart(6, '0')}`;
 
-                    // Build the final challan object with the unique number
                     const challan = {
                         challanNumber: newChallanNumber,
                         invoiceDate,
@@ -1496,7 +1493,6 @@
                         updatedAt: new Date().toISOString()
                     };
                     
-                    // Save the new challan
                     const challansRef = window.dbRef(window.database, 'challans');
                     const newChallanRef = window.dbPush(challansRef);
                     await window.dbSet(newChallanRef, challan);
