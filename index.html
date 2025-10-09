@@ -3,6 +3,17 @@
 
   <head>
     <meta charset="UTF-8">
+    <title>Finish Fabrics 2.2</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
     <title>FINISH FABRICS 2.1</title>
     
 
@@ -808,52 +819,89 @@
             }
         }
 
+        // ########## START: CORRECTED FUNCTION ##########
         // Convert number to words function
-        // MODIFIED FUNCTION
         function numberToWords(num, currency = 'BDT') {
-            if (num === 0) return 'Zero';
+            if (num === null || isNaN(num)) return ''; // Safety check for invalid input
+            if (num === 0) return currency === 'USD' ? 'Zero Dollars Only' : 'Zero Taka Only';
             
             const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
             const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
             const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
             
-            function convertHundreds(n) {
+            // This helper function converts any number into words using the Crore/Lakh system
+            function convertToWords(n) {
+                if (n === 0) return '';
+                
+                // This inner function handles numbers up to 999
+                function convertHundreds(numPart) {
+                    let result = '';
+                    if (numPart >= 100) {
+                        result += ones[Math.floor(numPart / 100)] + ' Hundred ';
+                        numPart %= 100;
+                    }
+                    if (numPart >= 20) {
+                        result += tens[Math.floor(numPart / 10)] + ' ';
+                        numPart %= 10;
+                    } else if (numPart >= 10) {
+                        result += teens[numPart - 10] + ' ';
+                        return result.trim(); // Return early as teens cover the unit place
+                    }
+                    if (numPart > 0) {
+                        result += ones[numPart] + ' ';
+                    }
+                    return result.trim();
+                }
+                
                 let result = '';
-                if (n >= 100) {
-                    result += ones[Math.floor(n / 100)] + ' Hundred ';
-                    n %= 100;
-                }
-                if (n >= 20) {
-                    result += tens[Math.floor(n / 10)] + ' ';
-                    n %= 10;
-                } else if (n >= 10) {
-                    result += teens[n - 10] + ' ';
-                    return result;
-                }
-                if (n > 0) {
-                    result += ones[n] + ' ';
-                }
-                return result;
+                let crore = Math.floor(n / 10000000);
+                n %= 10000000;
+                
+                let lakh = Math.floor(n / 100000);
+                n %= 100000;
+                
+                let thousand = Math.floor(n / 1000);
+                n %= 1000;
+                
+                if (crore > 0) result += convertHundreds(crore) + ' Crore ';
+                if (lakh > 0) result += convertHundreds(lakh) + ' Lakh ';
+                if (thousand > 0) result += convertHundreds(thousand) + ' Thousand ';
+                if (n > 0) result += convertHundreds(n);
+                
+                return result.trim();
+            }
+
+            // Ensure the number has two decimal places for currency calculation
+            const numFixed = parseFloat(num).toFixed(2);
+            // Split the number into the integer (taka/dollar) and fractional (paisa/cent) parts
+            const [integerPartStr, fractionalPartStr] = numFixed.split('.');
+            
+            const integerPart = parseInt(integerPartStr, 10);
+            const fractionalPart = parseInt(fractionalPartStr, 10);
+            
+            let words = '';
+            
+            // Convert the integer part if it's greater than zero
+            if (integerPart > 0) {
+                words += convertToWords(integerPart);
+                words += currency === 'USD' ? ' Dollars' : ' Taka';
             }
             
-            let result = '';
-            let crore = Math.floor(num / 10000000);
-            num %= 10000000;
+            // Convert the fractional part if it's greater than zero
+            if (fractionalPart > 0) {
+                // Add "and" if there was also an integer part
+                if (words !== '') {
+                    words += ' and ';
+                }
+                words += convertToWords(fractionalPart);
+                words += currency === 'USD' ? ' Cents' : ' Paisa';
+            }
             
-            let lakh = Math.floor(num / 100000);
-            num %= 100000;
-            
-            let thousand = Math.floor(num / 1000);
-            num %= 1000;
-            
-            if (crore > 0) result += convertHundreds(crore) + 'Crore ';
-            if (lakh > 0) result += convertHundreds(lakh) + 'Lakh ';
-            if (thousand > 0) result += convertHundreds(thousand) + 'Thousand ';
-            if (num > 0) result += convertHundreds(num);
-            
-            const currencyText = currency === 'USD' ? ' Dollar Only' : ' Taka Only';
-            return result.trim() + currencyText;
+            // Add "Only" at the end and capitalize the first letter
+            let finalWords = words.trim() + ' Only';
+            return finalWords.charAt(0).toUpperCase() + finalWords.slice(1);
         }
+        // ########## END: CORRECTED FUNCTION ##########
 
 
         // Helper function to check if transport fields should be shown
@@ -3025,6 +3073,10 @@
         });
     </script>
 </body>
+</html>
+    
+  </body>
+  
 </html>
     
   </body>
